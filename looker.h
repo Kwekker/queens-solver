@@ -24,9 +24,20 @@ typedef struct {
     pixel_t *pixels;
 } image_t;
 
+
+typedef struct {
+    int32_t x;
+    int32_t y;
+} coord_t;
+
+
+
 // Looking
 Window findBrowser(Display *display, Window root, int depth);
-image_t getBrowserWindow(void);
+
+// Gets an image of the browser window.
+// If browser == 0 it will try to find it by itself (using findBrowser).
+image_t getBrowserWindow(Window browser, coord_t *browser_coords);
 void imageToFile(
     const char *fileName, pixel_t *image, uint32_t width, uint32_t height
 );
@@ -40,7 +51,7 @@ void moveMouseTo(int x, int y);
 void clickMouse(void);
 void doubleClickMouse(void);
 
-void waitForActivation(void);
+Window waitForActivation(Window browser);
     
 
 #endif

@@ -5,3 +5,7 @@ solver
 seeer
 *.ppm
 *.svg
+
+testing/
+testing/**
+img/

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,11 +18,6 @@
 
 #define BLACK (pixel_t){.r = 0, .g = 0, .b = 0}
 #define WHITE (pixel_t){.r = 255, .g = 255, .b = 255}
-
-typedef struct {
-    int32_t x;
-    int32_t y;
-} coord_t;
 
 
 typedef struct {
@@ -60,10 +56,9 @@ int compare_bins(const void *a_ptr, const void *b_ptr) {
 
 
 uint32_t detectBoard(
-    image_t img, uint32_t **board, boardScreenInfo_t *screenInfo
+    image_t img, uint32_t **board, boardScreenInfo_t *screenInfo, uint32_t crossingOffset
 ) {
 
-    const uint32_t crossingOffset = 5;
     DPRINTF("Getting points :)\n");
     coord_t *points;
     uint32_t pointCount = getPoints(img, &points, crossingOffset);
@@ -318,7 +313,11 @@ void sanitizeBins(
 }
 
 
-static uint32_t *findColors(image_t img, bin_t *xBins, bin_t *yBins, uint32_t size) {
+static void fillBlob(
+    uint32_t *board, uint32_t size, coord_t pos, uint32_t setVal
+);
+
+uint32_t *findColors(image_t img, bin_t *xBins, bin_t *yBins, uint32_t size) {
 
     uint32_t cellDistance = xBins[1].coordinate - xBins[0].coordinate;
     uint32_t colors_i = 0;
@@ -363,9 +362,54 @@ static uint32_t *findColors(image_t img, bin_t *xBins, bin_t *yBins, uint32_t si
         }
     }
 
+    if (colors_i == size) {
+        return board;
+    }
+
+    if (colors_i > size) {
+        fprintf(stderr,
+            "There are too many colors??? I ain't dealing with that."
+        );
+        free(board);
+        return NULL;
+    }
+
+    // Ok so if we get here, there's groups with the same color.
+    // Not necessarily a problem, but we need to account for it.
+
+    DPRINTF(
+        "There are not enough colors. Assuming attached groups.\n"
+        "Running attached group algorithm..\n"
+    );
+
+    for (uint32_t i = 0; i < size * size; i++) {
+        printf("%d ", board[i]);
+        if (i % size == size - 1) printf("\n");
+    }
+
+
+    colors_i = 0;
+
+    // Iterate over the board and replace all the colors with new ones,
+    // with bit 31 set to 1.
+    for (uint32_t i = 0; i < size * size; i++) {
+        if (board[i] & (1 << 31)) continue;
+
+        coord_t pos = {i % size, i / size};
+        fillBlob(board, size, pos, colors_i | (1 << 31));
+        colors_i++; // Keep track of the amount of blobs we place.
+    }
+
+    // Unflip bit 31 for good measure (and debugability) (and preventing segfaults for some).
+    for (uint32_t i = 0; i < size * size; i++) {
+        board[i] ^= (1 << 31);
+    }
 
     if (colors_i != size) {
-        printf("There are too few colors!!!\n");
+        printf(
+            "There are too few colors, "
+            "even after identical group color resolution!!!\n"
+        );
         free(board);
         return NULL;
     }
@@ -379,6 +423,44 @@ static uint32_t *findColors(image_t img, bin_t *xBins, bin_t *yBins, uint32_t si
     #endif
 
     return board;
+}
+
+// Recursively replace all values equal to
+// the value on the starting pos to setVal
+void fillBlob(
+    uint32_t *board, uint32_t size, coord_t pos, uint32_t setVal
+) {
+    const uint32_t index = pos.x + pos.y * size;
+    const uint32_t replaceVal = board[index];
+    board[index] = setVal;
+
+    for (uint8_t i = 0; i < 4; i++) {
+        coord_t newPos;
+        // Check if it isn't out of bounds.
+        switch (i) {
+        case 0:
+            newPos = (coord_t) {pos.x + 1, pos.y};
+            if (newPos.x >= size) continue;
+            break;
+        case 1:
+            newPos = (coord_t) {pos.x, pos.y + 1};
+            if (newPos.y >= size) continue;
+            break;
+        case 2:
+            newPos = (coord_t) {pos.x - 1, pos.y};
+            if (newPos.x < 0) continue;
+            break;
+        case 3:
+            newPos = (coord_t) {pos.x, pos.y - 1};
+            if (newPos.y < 0) continue;
+            break;
+        }
+
+        // Check if it is the value we are replacing.
+        if (board[newPos.x + newPos.y * size] != replaceVal) continue;
+
+        fillBlob(board, size, newPos, setVal);
+    }
 }
 
 

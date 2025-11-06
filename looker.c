@@ -27,14 +27,16 @@ static void printProperties(Display *display, Window window);
 static void printKids(Display *display, Window *kids, uint32_t kidCount, uint32_t depth);
 
 
-image_t getBrowserWindow(void) {
+image_t getBrowserWindow(Window browser, coord_t *browser_coords) {
 
     image_t ret = {0};
 
     Display *display = XOpenDisplay(NULL);
     Window root = DefaultRootWindow(display);
 
-    Window browser = findBrowser(display, root, 0);
+    if (browser == 0) {
+        browser = findBrowser(display, root, 0);
+    }
 
     // Get window attributes (width, height).
     XWindowAttributes browser_attrs;
@@ -47,12 +49,40 @@ image_t getBrowserWindow(void) {
     XImage *image =
         XGetImage(display, browser, 0, 0, width, height, AllPlanes, ZPixmap);
 
+
     if (image == NULL) {
         DPRINTF("Window is cringe\n");
         XFree(display);
         return ret;
     }
     DPRINTF("Got image\n");
+
+
+    // Find browser coordinates.
+    browser_coords->x = 0;
+    browser_coords->y = 0;
+    Window child = browser;
+    while (1) {
+        XWindowAttributes child_attrs;
+        XGetWindowAttributes(display, child, &child_attrs);
+        browser_coords->x += child_attrs.x;
+        browser_coords->y += child_attrs.y;
+
+        printf("Window 0x%lx adds %d, %d\n", child, child_attrs.x, child_attrs.y);
+
+        if (child == root) break;
+
+        Window parent;
+        Window idc0;
+        Window *kids;
+        uint32_t idc1;
+        XQueryTree(display, child, &idc0, &parent, &kids, &idc1);
+        XFree(kids);
+
+        child = parent;
+    }
+
+    printf("Browser coords: %d, %d\n", browser_coords->x, browser_coords->y);
 
 
     // Allocate the array.
@@ -89,10 +119,13 @@ image_t getBrowserWindow(void) {
 }
 
 
-void waitForActivation(void) {
+Window waitForActivation(Window browser) {
     Display *display = XOpenDisplay(NULL);
-    Window root = DefaultRootWindow(display);
-    Window browser = findBrowser(display, root, 0);
+
+    if (browser == 0) {
+        Window root = DefaultRootWindow(display);
+        browser = findBrowser(display, root, 0);
+    }
 
     DPRINTF("Found window. Waiting for activation..\n");
 
@@ -106,7 +139,7 @@ void waitForActivation(void) {
         if (event.type == FocusIn) {
             DPRINTF("Window 0x%lx gained focus!\n", browser);
             XCloseDisplay(display);
-            return;
+            return browser;
         }
     }
 

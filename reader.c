@@ -2,9 +2,28 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "reader.h"
 #include "types.h"
+
+
+
+// int readHaha(FILE *file, board_t *board) {
+//     char c;
+//     char *currentToken;
+//     size_t tokenStart = -1;
+
+//     while (1) {
+
+//         while (isgraph(c = getc(file))) {
+//             if (tokenStart == -1) tokenStart = ftell(file);
+
+//         }
+
+//         while (isprint());
+//     }
+// }
 
 
 int readQueensFile(FILE *file, board_t *board) {

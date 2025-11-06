@@ -31,7 +31,8 @@ typedef struct {
 
 // Returns the size of the board, or 0 when it didn't detect one.
 uint32_t detectBoard(
-    image_t image, uint32_t **board, boardScreenInfo_t *screenInfo
+    image_t image, uint32_t **board, boardScreenInfo_t *screenInfo,
+    uint32_t crossingOffset
 );
 
 

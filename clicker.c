@@ -1,6 +1,8 @@
+#include <unistd.h>
+#include <stdio.h>
+
 #include "clicker.h"
 #include "looker.h"
-#include <unistd.h>
 
 
 
@@ -17,6 +19,10 @@ void clickSolveBoard(
             screenInfo.y + cell->y * screenInfo.offset
         );
         doubleClickMouse();
+        printf("Clicking %d, %d\n",
+            screenInfo.x + cell->x * screenInfo.offset,
+            screenInfo.y + cell->y * screenInfo.offset
+        );
         usleep(delay);
     }
 

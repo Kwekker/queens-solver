@@ -6,6 +6,7 @@
 
 #include "types.h"
 
+#define MAX_TOKEN_SIZE 64
 
 
 int measureQueensFile(FILE *file, uint32_t *size);

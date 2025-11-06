@@ -263,8 +263,11 @@ uint8_t checkSets(board_t board) {
 }
 
 
-#if 1
 void printBoard(board_t board, uint32_t indentation) {
+
+    if (board.size == 0) {
+        fprintf(stderr, "Board has size 0??? I can't print that!!\n");
+    }
 
     for (uint8_t t = 0; t < indentation; t++) printf("\t");
     printf("   ");
@@ -298,31 +301,6 @@ void printBoard(board_t board, uint32_t indentation) {
     }
 
 }
-
-#else
-
-void printBoard(board_t board) {
-
-    for (uint32_t s = 0; s < 3; s++) {
-        for (uint32_t i = 0; i < board.size; i++) {
-            cellSet_t *set = &board.set_arrays[s][i];
-
-            printf("Set [%d][%d]:\n", s, i);
-            printf("\tid: %d\n", set->identifier);
-            printf("\tcellCount: %d\n", set->cellCount);
-            printf("\tsolved: %d\n", set->solved);
-            printf("\tcells: ");
-            for (uint32_t c = 0; c < set->cellCount; c++) {
-                if (set->cells[c]->sets[s] != set) {
-                    printf("\x1b[31m%d\x1b[0m ", c);
-                }
-            }
-            printf("\n");
-        }
-    }
-
-}
-#endif
 
 
 void printBoardVars(board_t board) {

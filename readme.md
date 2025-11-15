@@ -168,4 +168,7 @@ Set the vertical margin between waves. A MARGIN of 0 will make the waves kiss. D
 * `-f, --force` Do not prompt before overwriting.
 * `-F, --hard-force` Do not prompt anything. Useful for piping. Will supress warnings like "this diagram will be absurdly long, are you sure?"
 
+* `-l, --list-signals`\
+List all drawable signals.
+
 ## Signal specification 

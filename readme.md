@@ -136,8 +136,9 @@ Start with the first **group** (a group is a set of same-coloured cells).
 This way, it checks all possible queens positions rather efficiently. So efficiently in fact, that I'm actually not sure if using the techniques described in [Techniques](#techniques) make the program more efficient, or are actually slowing it down. I can, however, not be bothered to check this.
 
 
-> ignore the next part, I'm taking notes in a car
+
 # VCD to SVG converter
+> ignore the next part, I'm taking notes in a car
 This is a program that will eventually be able to generate a diagram from a VCD input. It is written in C without any parser libraries because I am a masochist. I wrote this for the 5 people on this planet that, like me, *hate* it when they have to include a screenshot of a GTKWave/ModelSim waveform into a report. There are going to be a few settings you can adjust. Usage will be as follows:
 
 ```bash
@@ -145,9 +146,26 @@ This is a program that will eventually be able to generate a diagram from a VCD 
 ```
 Here, INPUT is the input file, and output the output file (wow). The placement of the options doesn't matter you can place those anywhere. If no output file is provided the SVG output will be dumped to stdout for easy piping. The following options are available:
 
-* `-s, --signals=SIGNALS` 
+* `-s, --signals=SIGNALS`\
+The names of the signals you want displayed, in the order you want them displayed. Without this option, all signals will be displayed. See [Signal specification] for more info.
+
+* `-i, --interval=INTERVAL` Specify the time interval to make a diagram of. Time should be given followed by a unit, otherwise raw time integer values are used. Time can be specified in the following ways:
+  - `3us` 0us - 3us
+  - `3:10us` 3us - 10us
+  - `:10ms` 0ms - 10ms
+  - `12ns:` 12ns - end of file
+  - `200us:3ms` 300us - 3ms
+
+* `-h, --height=HEIGHT`\
+Set the height of one waveform.
+* `-w, --width=WIDTH`\
+Set the width of the *waveform*. The full image is larger, since signal names are added.
+* `-W, --image-width=IMAGE_WIDTH`\
+Set the width of the entire image, including signal names. Setting both **-w** and **-W** is possible but will result in unexpected behavior. 
 * `-m, --margin=MARGIN`\
 Set the vertical margin between waves. A MARGIN of 0 will make the waves kiss. Default is **idk**.
 
-* `-f, --force` do not prompt before overwriting.
-* `-F, --hard-force` do not prompt anything. Useful for piping. Will supress warnings like "this diagram will be absurdly long, are you sure?"
+* `-f, --force` Do not prompt before overwriting.
+* `-F, --hard-force` Do not prompt anything. Useful for piping. Will supress warnings like "this diagram will be absurdly long, are you sure?"
+
+## Signal specification 

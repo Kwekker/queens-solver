@@ -136,7 +136,5 @@ Start with the first **group** (a group is a set of same-coloured cells).
 This way, it checks all possible queens positions rather efficiently. So efficiently in fact, that I'm actually not sure if using the techniques described in [Techniques](#techniques) make the program more efficient, or are actually slowing it down. I can, however, not be bothered to check this.
 
 
-```csv pretty
-Hatsune,Miku,poezen
-end,kwek,testje
-```
+> [!WARNING]
+> Cat spotted
